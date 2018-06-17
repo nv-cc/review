@@ -1,6 +1,5 @@
 <template>
   <section class="page">
-    hello, this is defalue router!
     <el-tabs tab-position="left" class="tabs-container">
       <el-tab-pane v-for="li in componentsMsg" :key="li.name" :label="li.introduce">
         <component :is="li.name"></component>

@@ -3,9 +3,9 @@ class Dot {
     Object.assign(this, config);
   }
 
-  print(ctx, gap) {
+  print(ctx, diff) {
     ctx.fillStyle = this.style ? this.style : 'black';
-    ctx.fillRect(this.sx, this.sy, gap, gap);
+    ctx.fillRect(this.sx, this.sy, diff, diff);
     this.sx = this.sx + (this.x - this.sx) * this.speed || 0.07;
     this.sy = this.sy + (this.y - this.sy) * this.speed || 0.07;
   }
@@ -24,7 +24,7 @@ class Constructor {
   }
 
   init() {
-    this.gap = 2;
+    this.diff = 2;
     this.timer = null;
     this.running = false;
     this.dots = this.getTextDots(this.textArray[this.textIndex]);
@@ -45,10 +45,11 @@ class Constructor {
   anim() {
     this.ctx.save();
     this.ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    this.ctx.globalCompositeOperation = 'destination-in';
     this.ctx.fillRect(0, 0, this.width, this.height);
     this.ctx.restore();
     this.dots.forEach(v => {
-      v.print(this.ctx, this.gap);
+      v.print(this.ctx, this.diff);
     });
     this.timer = requestAnimationFrame(this.anim.bind(this));
 
@@ -59,7 +60,9 @@ class Constructor {
         this.running = false;
         //完成一个，混合dots，并生成下一堆dots，继续动画,
         this.mixDots();
-        this.nextDots = this.getTextDots(this.textArray[++this.textIndex]);
+        ++this.textIndex;
+        this.textIndex >= this.textArray.length && (this.textIndex = 0);
+        this.nextDots = this.getTextDots(this.textArray[this.textIndex]);
         // again
         this.timer = requestAnimationFrame(this.anim.bind(this));
       }, 5000);
@@ -115,8 +118,8 @@ Constructor.prototype.getTextDots = function () {
     _ctx.fillText(text, _width / 2, _height / 2);
     const pixel = _ctx.getImageData(0, 0, _width, _height).data;
     const dots = [];
-    util.interEach(_width, this.gap, x => {
-      util.interEach(_height, this.gap, y => {
+    util.interEach(_width, this.diff, x => {
+      util.interEach(_height, this.diff, y => {
         let index = ((y - 1) * _width + x) * 4;
         if (pixel[index + 3] > 0) {
           dots.push(new Dot({
@@ -172,7 +175,7 @@ export default {
           "何必为了一段插曲哭到沙哑",
           "过程不留遗憾结果也就伟大",
           "Lrc By：珍妮 QQ：929964514"
-        ]
+        ],
       });
     });
   }
